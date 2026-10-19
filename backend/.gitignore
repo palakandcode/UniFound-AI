@@ -1,0 +1,9 @@
+node_modules/
+.env
+uploads/id-cards/*
+!uploads/id-cards/.gitkeep
+uploads/items/*
+!uploads/items/.gitkeep
+uploads/avatars/*
+!uploads/avatars/.gitkeep
+npm-debug.log*

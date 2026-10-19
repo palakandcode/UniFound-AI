@@ -1,0 +1,80 @@
+# UniFind AI V2 — Start Here
+
+## 1. Start backend
+
+```text
+cd backend
+npm install
+npm run db:init
+npm run db:seed
+npm run dev
+```
+
+## 2. Start frontend
+
+Serve the project ROOT with VS Code Live Server (or another static server) and open `index.html`.
+
+## 3. Demo accounts
+
+Finder:
+- demo@somaiya.edu
+- ChangeMe123!
+
+Claimant:
+- test2@somaiya.edu
+- ChangeMe123!
+
+## 4. Test the complete return flow
+
+1. Sign in as `demo@somaiya.edu`.
+2. Open My Found Items and select a found item.
+3. Sign out and sign in as `test2@somaiya.edu`.
+4. Submit a claim with a detailed ownership explanation.
+5. Sign back in as demo.
+6. Open My Found Items → Incoming claims.
+7. Confirm the claimant shows as a verified ID user and approve the claim.
+8. Open Messages and coordinate the handover in a public campus location.
+9. Sign in as test2 and click **I received it**.
+10. The item changes to `RETURNED`.
+
+## 5. Browse and use the campus marketplace
+
+Choose **Marketplace** to browse listings for sale or rent. Sign in to publish a listing or message its owner. Sellers can mark a listing sold, and renters can mark it rented. Use a public campus location for exchanges; payments are arranged directly between students.
+
+Visitors can explore public lost-and-found reports and marketplace listings from the sign-in screen before creating an account.
+
+## New-account verification
+
+The first-time signup flow requires:
+- name
+- member/student ID
+- Somaiya email or Gmail
+- password
+- OTP
+- Somaiya ID-card photo
+
+The ID card is kept private. OCR extracts text and attempts to match the entered name and member ID. If the match is not strong enough, the account remains pending and an administrator can verify it through the existing admin routes.
+
+## Campus location coverage
+
+The location selector includes:
+- Aryabhatt Building: A101–A418 (4 floors)
+- Bhaskaracharya Building: B101–B618 (6 floors)
+- Govinda Canteen
+- KJSSE Engineering Canteen
+- Aurobindo Canteen
+- 2nd Floor Library
+- 4th Floor Library
+- Sandipani Hostel
+- Maitreyi Hostel
+- Polytechnic Hostel
+- Tagore Amphitheater
+- Gargi Plaza
+- Takshila Auditorium
+- Nalanda Auditorium
+- Smt. Sakarben Sabhagruha
+- Medical Centre
+- ATM
+- Sports Ground
+
+The KJSCE building/floor structure and campus facilities were checked against Somaiya/KJSCE public infrastructure information before adding the location set.

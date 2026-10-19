@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniFind AI — Campus Lost & Found</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=unifind-u-20261019-v2">
+<link rel="stylesheet" href="style.css?v=unifind-campus-20261019-3">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+</head>
+<body>
+
+<div id="authScreen" class="auth-screen" aria-hidden="false">
+  <div class="auth-panel">
+    <div class="auth-visual"><div class="brand auth-brand"><div class="brand-mark">U</div><div><div class="logo">UniFind <span>AI</span></div><small>Somaiya campus lost & found</small></div></div>
+      <div class="auth-visual-copy"><p class="eyebrow">SOMAIYA VIDYAVIHAR</p><h1>Lost something?<br><span>Let campus bring it home.</span></h1><p>Report, match, verify and safely recover items across the Somaiya Vidyavihar campus.</p><div class="auth-trust"><span>✓ Verified student identity</span><span>✓ Claim approval</span><span>✓ Safe handover</span></div></div><img class="campus-illustration" src="campus-scene.svg" alt="" aria-hidden="true">
+      <button type="button" class="visitor-entry" id="visitorEntry">Explore campus as a visitor <span>→</span></button>
+    </div>
+    <div class="auth-card"><div class="auth-tabs"><button type="button" class="auth-tab active" data-auth-tab="login">Sign in</button><button type="button" class="auth-tab" data-auth-tab="signup">Create account</button></div>
+      <div id="loginPanel" class="auth-form-panel"><p class="eyebrow">WELCOME BACK</p><h2>Sign in to UniFind</h2><p class="subtitle">Sign in with your Somaiya university account. Visitors can browse without an account.</p>
+        <button class="google-btn" type="button" id="googleLoginBtn"><span class="google-g">G</span> Continue with Google</button><div class="auth-divider"><span>or continue with password</span></div>
+        <form id="loginForm"><label>Somaiya email / Member ID<input id="loginIdentifier" required autocomplete="username" placeholder="name@somaiya.edu"></label><label>Password<input id="loginPassword" required type="password" autocomplete="current-password" placeholder="••••••••"></label><div class="auth-inline"><button type="button" class="text-btn" id="forgotPasswordBtn">Forgot password?</button></div><div id="loginError" class="form-error"></div><button class="btn btn-success auth-submit" type="submit">Sign in</button></form>
+        <button type="button" class="visitor-entry visitor-entry-mobile" id="visitorEntryMobile">Explore campus as a visitor →</button>
+      </div>
+      <div id="signupPanel" class="auth-form-panel hidden-auth-panel"><p class="eyebrow">NEW STUDENT</p><h2>Create your UniFind account</h2><p class="subtitle">Your university ID is used to protect ownership claims.</p>
+        <form id="signupForm"><div class="auth-two-col"><label>Full name<input id="signupName" required maxlength="120" autocomplete="name"></label><label>Member / Student ID<input id="signupMemberId" required maxlength="80"></label></div>
+          <label>Somaiya email<input id="signupEmail" required type="email" placeholder="name@somaiya.edu" autocomplete="email"></label><label>Create password<input id="signupPassword" required type="password" minlength="8" autocomplete="new-password"></label><label>Confirm password<input id="signupPassword2" required type="password" minlength="8" autocomplete="new-password"></label>
+          <div class="id-onboarding"><div><strong>Step 1 of 2 — Verify your student ID</strong><span>Upload your Somaiya ID card. UniFind will extract the details and use them to strengthen claim verification.</span></div><label class="upload-mini"><input id="signupIdCard" type="file" accept="image/jpeg,image/png,image/webp" required><span id="signupIdCardText">Upload Somaiya ID card</span></label><div id="signupOcrStatus" class="small-status">Required for new accounts.</div></div>
+          <div class="otp-row"><input id="signupOtp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" required><button type="button" class="btn btn-outline" id="sendSignupOtpBtn">Send OTP</button></div>
+          <div id="signupError" class="form-error"></div><button class="btn btn-success auth-submit" type="submit" id="signupSubmitBtn">Create account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">U</div><div><div class="logo">UniFind <span>AI</span></div><small>Campus lost & found</small></div></div>
+  <nav class="main-nav" aria-label="Main navigation">
+    <a href="#home" class="nav-link" data-page="home"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></span>Home</a>
+    <a href="#search" class="nav-link" data-page="search"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></span>Search</a>
+    <a href="#marketplace" class="nav-link" data-page="marketplace"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1 12H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></span>Marketplace</a>
+    <a href="#items-lost" class="nav-link" data-page="items-lost"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"/><path d="M5 20h14"/></svg></span>My Lost Items</a>
+    <a href="#items-found" class="nav-link" data-page="items-found"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6"/><path d="M5 4h14"/></svg></span>My Found Items</a>
+    <a href="#matches" class="nav-link" data-page="matches"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg></span>Potential Matches</a>
+    <a href="#notifications" class="nav-link" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>Notifications <b id="notificationCount" class="nav-count">0</b></a>
+    <a href="#messages" class="nav-link" data-page="messages"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a8.5 8.5 0 0 1-12.7 7.4L3 20l1.1-4.1A8.5 8.5 0 1 1 20 11.5Z"/></svg></span>Messages <b id="messageCount" class="nav-count"></b></a>
+  </nav>
+  <div class="nav-divider"></div>
+  <nav class="main-nav secondary-nav">
+    <a href="#profile" class="nav-link" data-page="profile"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Profile</a>
+    <a href="#settings" class="nav-link" data-page="settings"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 3.1-.2-.1a1.8 1.8 0 0 0-1.9.2l-.2.1h-3.5l-.1-.2a1.8 1.8 0 0 0-1.6-1.1h-.2l-3-1.8.1-.2a1.8 1.8 0 0 0-.2-1.9l-.1-.2v-3.5l.2-.1a1.8 1.8 0 0 0 1.1-1.6v-.2l1.8-3 .2.1a1.8 1.8 0 0 0 1.9-.2l.2-.1h3.5l.1.2a1.8 1.8 0 0 0 1.6 1.1h.2l3 1.8-.1.2a1.8 1.8 0 0 0 .2 1.9l.1.2v3.5l-.2.1a1.8 1.8 0 0 0-1.1 1.6Z" transform="translate(-1 -1) scale(1.08)"/></svg></span>Settings</a>
+    <a href="#contact" class="nav-link" data-page="contact"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.7 1.2c-.8 1.2-2.3 1.4-2.3 3.3M12 17h.01"/></svg></span>Help & Contact</a>
+  </nav>
+  <button class="logout-link" id="logoutBtn"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5m5 5H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg></span>Logout</button>
+</aside>
+
+<main class="content">
+<div class="visitor-banner" id="visitorBanner"><span>👋</span><div><strong>Browsing as a visitor</strong><p>You can explore campus reports and listings. Sign in to post, claim, save or message.</p></div><button type="button" class="btn btn-outline" data-auth-needed>Sign in / Create account</button></div>
+<section id="home" class="page">
+  <header class="page-header">
+    <div><p class="eyebrow">WELCOME BACK</p><h1>Find what matters.</h1><p class="subtitle">Lost something? Found something? Let your campus help.</p></div>
+    <div class="header-actions">
+      <button class="btn btn-danger" data-open-report="lost">＋ I Lost Something</button>
+      <button class="btn btn-success" data-open-report="found">＋ I Found Something</button>
+    </div>
+  </header>
+
+  <div class="search-box large-search"><span class="search-symbol">⌕</span><input id="homeSearch" type="search" placeholder="Search wallets, phones, ID cards, bottles..." autocomplete="off"><button id="homeSearchBtn" class="search-button">Search</button></div>
+
+  <div class="filter-bar" id="homeFilters">
+    <button class="filter active" data-filter="all">All</button><button class="filter" data-filter="lost">Lost</button><button class="filter" data-filter="found">Found</button><button class="filter" data-filter="electronics">Electronics</button><button class="filter" data-filter="accessories">Accessories</button><button class="filter" data-filter="id-cards">ID Cards</button><button class="filter" data-filter="books">Books</button><button class="filter" data-filter="other">Other</button>
+  </div>
+
+  <div class="quick-card">
+    <div><span class="sparkle">✦</span><h2>What happened to your item?</h2><p>Report it in under a minute. Add a photo and details so the right person can recognize it.</p></div>
+    <div class="quick-actions"><button class="quick-lost" data-open-report="lost">Report Lost</button><button class="quick-found" data-open-report="found">Report Found</button></div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-heading"><div><span class="section-label red">LOST ITEMS</span><h2>Still looking for their owners</h2><p>Active reports from students who have lost something.</p></div><button class="text-btn" data-page-link="items-lost">View all →</button></div>
+    <div class="item-grid" id="homeLostGrid"></div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-heading"><div><span class="section-label green">FOUND ITEMS</span><h2>Waiting to go home</h2><p>Items found around campus that have not been returned.</p></div><button class="text-btn" data-page-link="items-found">View all →</button></div>
+    <div class="item-grid" id="homeFoundGrid"></div>
+  </div>
+
+  <div class="recovery-strip"><div class="recovery-icon">✓</div><div><strong>Every return starts with a report.</strong><span>UniFind keeps active lost and found reports visible until the item is recovered.</span></div><button class="btn btn-outline" data-page-link="matches">View my matches</button></div>
+</section>
+
+<section id="marketplace" class="page">
+  <header class="page-header"><div><p class="eyebrow">CAMPUS MARKETPLACE</p><h1>Good finds, close by.</h1><p class="subtitle">Buy, sell or rent from your campus community. Meet in a public campus location.</p></div><button class="btn btn-success" id="createListingBtn">＋ Create a listing</button></header>
+  <div class="market-intro"><span class="market-intro-icon">◇</span><div><strong>A simpler way to share what you have.</strong><p>Browse campus listings and message the owner to arrange a safe meetup. In-app checkout and paid invoices are not available yet.</p></div><span class="market-safety">Campus community · Meet in public</span></div>
+  <div class="market-toolbar"><div class="market-tabs" role="group" aria-label="Listing type"><button class="market-tab active" data-market-filter="all">All listings</button><button class="market-tab" data-market-filter="SELL">For sale</button><button class="market-tab" data-market-filter="RENT">For rent</button></div><div class="market-search"><span>⌕</span><input id="marketSearch" type="search" placeholder="Search books, calculators, cycles…" aria-label="Search marketplace"></div><select id="marketCategory" aria-label="Filter by category"><option value="all">All categories</option><option>Books</option><option>Electronics</option><option>Accessories</option><option>Sports</option><option>Other</option></select><select id="marketSort" aria-label="Sort listings"><option value="newest">Recently added</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></div>
+  <div class="market-results"><strong id="marketCount">0 listings</strong><span>Confirm availability · Payment is arranged directly for now</span></div><div id="marketGrid" class="item-grid"></div>
+</section>
+
+<section id="search" class="page">
+  <header class="simple-header"><p class="eyebrow">DISCOVER</p><h1>Search campus items</h1><p class="subtitle">Find active lost and found reports using keywords and filters.</p></header>
+  <div class="search-box large-search"><span class="search-symbol">⌕</span><input id="searchPageInput" type="search" placeholder="Try “black wallet near library”"><button id="searchPageBtn" class="search-button">Search</button></div>
+  <div class="search-layout">
+    <aside class="filter-panel"><h3>Filter results</h3>
+      <label>Status<select id="searchStatus"><option value="all">All active items</option><option value="lost">Lost</option><option value="found">Found</option></select></label>
+      <label>Category<select id="searchCategory"><option value="all">All categories</option><option value="electronics">Electronics</option><option value="accessories">Accessories</option><option value="id-cards">ID Cards</option><option value="books">Books</option><option value="other">Other</option></select></label>
+      <label>Location<select id="searchLocation"><option value="all">All campus</option><option>Govinda Canteen</option><option>KJSSE Engineering Canteen</option><option>Aurobindo Canteen</option><option>2nd Floor Library</option><option>4th Floor Library</option><option>Sandipani Hostel</option><option>Maitreyi Hostel</option><option>Polytechnic Hostel</option><option>Tagore Amphitheater</option><option>Gargi Plaza</option><option>Takshila Auditorium</option><option>Nalanda Auditorium</option><option>Smt. Sakarben Sabhagraha</option><option>Medical Centre</option><option>ATM</option><option>Sports Ground</option><option>A101</option><option>A102</option><option>A103</option><option>A104</option><option>A105</option><option>A106</option><option>A107</option><option>A108</option><option>A109</option><option>A110</option><option>A111</option><option>A112</option><option>A113</option><option>A114</option><option>A115</option><option>A116</option><option>A117</option><option>A118</option><option>A201</option><option>A202</option><option>A203</option><option>A204</option><option>A205</option><option>A206</option><option>A207</option><option>A208</option><option>A209</option><option>A210</option><option>A211</option><option>A212</option><option>A213</option><option>A214</option><option>A215</option><option>A216</option><option>A217</option><option>A218</option><option>A301</option><option>A302</option><option>A303</option><option>A304</option><option>A305</option><option>A306</option><option>A307</option><option>A308</option><option>A309</option><option>A310</option><option>A311</option><option>A312</option><option>A313</option><option>A314</option><option>A315</option><option>A316</option><option>A317</option><option>A318</option><option>A401</option><option>A402</option><option>A403</option><option>A404</option><option>A405</option><option>A406</option><option>A407</option><option>A408</option><option>A409</option><option>A410</option><option>A411</option><option>A412</option><option>A413</option><option>A414</option><option>A415</option><option>A416</option><option>A417</option><option>A418</option><option>B101</option><option>B102</option><option>B103</option><option>B104</option><option>B105</option><option>B106</option><option>B107</option><option>B108</option><option>B109</option><option>B110</option><option>B111</option><option>B112</option><option>B113</option><option>B114</option><option>B115</option><option>B116</option><option>B117</option><option>B118</option><option>B201</option><option>B202</option><option>B203</option><option>B204</option><option>B205</option><option>B206</option><option>B207</option><option>B208</option><option>B209</option><option>B210</option><option>B211</option><option>B212</option><option>B213</option><option>B214</option><option>B215</option><option>B216</option><option>B217</option><option>B218</option><option>B301</option><option>B302</option><option>B303</option><option>B304</option><option>B305</option><option>B306</option><option>B307</option><option>B308</option><option>B309</option><option>B310</option><option>B311</option><option>B312</option><option>B313</option><option>B314</option><option>B315</option><option>B316</option><option>B317</option><option>B318</option><option>B401</option><option>B402</option><option>B403</option><option>B404</option><option>B405</option><option>B406</option><option>B407</option><option>B408</option><option>B409</option><option>B410</option><option>B411</option><option>B412</option><option>B413</option><option>B414</option><option>B415</option><option>B416</option><option>B417</option><option>B418</option><option>B501</option><option>B502</option><option>B503</option><option>B504</option><option>B505</option><option>B506</option><option>B507</option><option>B508</option><option>B509</option><option>B510</option><option>B511</option><option>B512</option><option>B513</option><option>B514</option><option>B515</option><option>B516</option><option>B517</option><option>B518</option><option>B601</option><option>B602</option><option>B603</option><option>B604</option><option>B605</option><option>B606</option><option>B607</option><option>B608</option><option>B609</option><option>B610</option><option>B611</option><option>B612</option><option>B613</option><option>B614</option><option>B615</option><option>B616</option><option>B617</option><option>B618</option></select></label>
+      <label>Sort<select id="searchSort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
+    </aside>
+    <div><div class="results-top"><strong id="resultCount">0 results</strong><span id="searchHint">Showing active reports</span></div><div class="item-grid" id="searchResults"></div></div>
+  </div>
+</section>
+
+<section id="items-lost" class="page"><header class="simple-header"><p class="eyebrow">MY ACTIVITY</p><h1>My Lost Items</h1><p class="subtitle">Track items you reported as lost and claims you submitted.</p></header><div id="myLostGrid" class="item-grid"></div><div class="claim-section"><h2>My claims</h2><div id="myClaimsList" class="claim-list"></div></div></section>
+<section id="items-found" class="page"><header class="simple-header"><p class="eyebrow">MY ACTIVITY</p><h1>My Found Items</h1><p class="subtitle">Track items you found, review claims and safely hand them over.</p></header><div id="myFoundGrid" class="item-grid"></div><div class="claim-section"><h2>Incoming claims</h2><div id="incomingClaimsList" class="claim-list"></div></div></section>
+
+<section id="matches" class="page"><header class="simple-header"><p class="eyebrow">AI ASSISTED</p><h1>Potential Matches</h1><p class="subtitle">UniFind compares your lost reports with active found reports. Matches are suggestions, not ownership decisions.</p></header><div id="matchesList" class="matches-list"></div></section>
+
+<section id="notifications" class="page"><header class="simple-header"><p class="eyebrow">UPDATES</p><h1>Notifications</h1><p class="subtitle">Claims, possible matches and item status updates appear here.</p></header><div id="notificationsList" class="notification-list"></div></section><section id="messages" class="page"><div class="messages-layout"><aside class="conversation-sidebar"><label class="conversation-search"><span>⌕</span><input id="conversationSearch" type="search" placeholder="Find a conversation" aria-label="Find a conversation"></label><div id="conversationList" class="conversation-list"></div></aside><div class="chat-panel"><div class="chat-header"><div class="chat-peer chat-empty-peer"><span class="chat-empty-icon" aria-hidden="true">✦</span><span class="chat-peer-copy"><strong>Your campus inbox</strong><span>Choose a chat to coordinate a safe handover</span></span></div></div><div id="chatMessages" class="chat-messages"><div class="empty-state"><div class="empty-icon">✉</div><h3>Pick up where campus connects</h3><p>Your approved claims and marketplace chats will appear here.</p><div class="chat-empty-art" aria-hidden="true"><span>📚</span><span>🏫</span><span>💬</span></div></div></div><form id="messageForm" class="message-form"><input id="messageInput" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" disabled><button class="btn btn-success" type="submit" disabled>Send</button></form><div class="chat-footnote">Keep your exchange on campus and meet in a busy public location.</div></div></div></section>
+
+<section id="profile" class="page"><header class="simple-header"><p class="eyebrow">ACCOUNT</p><h1>Profile</h1><p class="subtitle">Your campus identity and activity.</p></header>
+  <div class="profile-card">
+    <div class="avatar" id="profileAvatar">MK</div>
+    <div class="profile-main"><h2 id="profileName">Student</h2><p id="profileEmail">student@somaiya.edu</p><span class="verified" id="profileVerification">Account status</span></div>
+  </div>
+  <div class="stats-grid"><div class="stat-card"><strong id="profileLostCount">0</strong><span>Items lost</span></div><div class="stat-card"><strong id="profileFoundCount">0</strong><span>Items found</span></div><div class="stat-card"><strong id="profileReturnedCount">0</strong><span>Items returned</span></div></div>
+  <div class="settings-card profile-edit-card">
+    <h3>Edit profile</h3>
+    <form id="profileForm" class="form-grid">
+      <label>Name<input id="profileEditName" maxlength="100"></label>
+      <label>Member ID<input id="profileEditMemberId" maxlength="50"></label>
+      <label>Phone<input id="profileEditPhone" maxlength="30"></label>
+      <label>Department<input id="profileEditDepartment" maxlength="100"></label>
+      <label>Course<input id="profileEditCourse" maxlength="100"></label>
+      <label>Year / Batch<input id="profileEditYearBatch" maxlength="50"></label>
+      <div class="form-actions"><button class="btn btn-outline" type="button" id="avatarBtn">Upload profile photo</button><input id="avatarInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><button class="btn btn-success" type="submit">Save profile</button></div>
+      <div id="profileError" class="form-error"></div>
+    </form>
+    <div class="id-card-actions">
+      <strong>University ID card</strong><span id="idCardStatus">Not uploaded</span>
+      <input id="idCardInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+      <button class="btn btn-outline" type="button" id="idCardBtn">Upload ID card</button>
+    </div>
+  </div>
+</section>
+
+<section id="settings" class="page"><header class="simple-header"><p class="eyebrow">PREFERENCES</p><h1>Settings</h1><p class="subtitle">Control how UniFind behaves for you.</p></header>
+  <div class="settings-card">
+    <label class="setting-row"><div><strong>Allow in-app messages</strong><span>Let an approved claimant/finder contact you inside UniFind.</span></div><input type="checkbox" id="allowMessages" checked></label>
+    <label class="setting-row"><div><strong>Allow in-app audio calls</strong><span>Let other participants start a browser audio call. Your microphone is used only after you start or answer a call. A Phone app link is also shown when you share a number.</span></div><input type="checkbox" id="allowCalls"></label>
+    <label class="setting-row"><div><strong>Allow email contact</strong><span>Show an Email button in your chats and share your saved email with conversation participants.</span></div><input type="checkbox" id="allowEmail"></label>
+    <div class="form-actions"><button class="btn btn-success" type="button" id="saveContactPrefs">Save contact preferences</button></div>
+  </div>
+</section>
+
+<section id="contact" class="page"><header class="simple-header"><p class="eyebrow">SUPPORT</p><h1>Help & Contact</h1><p class="subtitle">Need help with a report, claim or handover?</p></header>
+  <div class="help-grid">
+    <div class="help-card"><span>?</span><h3>Claim problem</h3><p>If you believe an item is yours but cannot complete a claim, contact a campus moderator.</p><button class="text-btn" id="claimHelpBtn">Contact moderator →</button></div>
+    <div class="help-card"><span>!</span><h3>Suspicious listing</h3><p>Report misleading descriptions, inappropriate content or suspicious ownership claims.</p><button class="text-btn" id="reportHelpBtn">Report an issue →</button></div>
+    <div class="help-card"><span>✓</span><h3>Safe handover</h3><p>Use a public campus location or designated security/help desk for exchanges.</p></div>
+  </div>
+</section>
+</main>
+</div>
+
+
+<div class="modal-backdrop" id="reportModal" aria-hidden="true">
+<div class="modal report-modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+<button class="modal-close" data-close-modal aria-label="Close">×</button>
+<div class="modal-head"><span class="modal-icon" id="reportIcon">↗</span><div><p class="eyebrow" id="reportEyebrow">LOST REPORT</p><h2 id="reportTitle">Report a Lost Item</h2><p id="reportSubtitle">Give enough information for other students to recognize the item.</p></div></div>
+<form id="reportForm">
+<input type="hidden" id="reportType" value="lost">
+<div class="form-section"><h3>1. Item details</h3>
+<div class="form-grid"><label>Item name *<input id="itemTitle" required maxlength="80" placeholder="e.g. Black Samsung wallet"></label>
+<label>Category *<select id="itemCategory" required><option value="">Select category</option><option value="electronics">Electronics</option><option value="accessories">Accessories</option><option value="id-cards">ID Cards</option><option value="books">Books</option><option value="other">Other</option></select></label></div>
+<label>Description *<textarea id="itemDescription" required maxlength="500" placeholder="Describe the object, color, brand and other visible characteristics."></textarea></label>
+<label>Distinguishing details<textarea id="itemDetails" maxlength="300" placeholder="Scratches, stickers, case, initials, unique marks..."></textarea><small>Keep one private ownership detail out of the public description if possible.</small></label>
+</div>
+
+
+<div class="form-section"><h3>2. Photo</h3>
+<label class="upload-zone" for="itemImage"><span class="upload-preview" id="uploadPreview">＋</span><strong id="uploadText">Add a photo</strong><small>JPG, PNG or WEBP · max 5 MB</small><input id="itemImage" type="file" accept="image/png,image/jpeg,image/webp"></label>
+</div>
+<div class="form-section"><h3>3. When & where?</h3>
+<div class="form-grid"><label>Date *<input id="eventDate" type="date" required></label><label>Approx. time<input id="eventTime" type="time"></label></div>
+<div class="form-grid"><label>Location *<select id="itemLocation" required><option value="">Select campus location</option><option>Govinda Canteen</option><option>KJSSE Engineering Canteen</option><option>Aurobindo Canteen</option><option>2nd Floor Library</option><option>4th Floor Library</option><option>Sandipani Hostel</option><option>Maitreyi Hostel</option><option>Polytechnic Hostel</option><option>Tagore Amphitheater</option><option>Gargi Plaza</option><option>Takshila Auditorium</option><option>Nalanda Auditorium</option><option>Smt. Sakarben Sabhagraha</option><option>Medical Centre</option><option>ATM</option><option>Sports Ground</option><option>A101</option><option>A102</option><option>A103</option><option>A104</option><option>A105</option><option>A106</option><option>A107</option><option>A108</option><option>A109</option><option>A110</option><option>A111</option><option>A112</option><option>A113</option><option>A114</option><option>A115</option><option>A116</option><option>A117</option><option>A118</option><option>A201</option><option>A202</option><option>A203</option><option>A204</option><option>A205</option><option>A206</option><option>A207</option><option>A208</option><option>A209</option><option>A210</option><option>A211</option><option>A212</option><option>A213</option><option>A214</option><option>A215</option><option>A216</option><option>A217</option><option>A218</option><option>A301</option><option>A302</option><option>A303</option><option>A304</option><option>A305</option><option>A306</option><option>A307</option><option>A308</option><option>A309</option><option>A310</option><option>A311</option><option>A312</option><option>A313</option><option>A314</option><option>A315</option><option>A316</option><option>A317</option><option>A318</option><option>A401</option><option>A402</option><option>A403</option><option>A404</option><option>A405</option><option>A406</option><option>A407</option><option>A408</option><option>A409</option><option>A410</option><option>A411</option><option>A412</option><option>A413</option><option>A414</option><option>A415</option><option>A416</option><option>A417</option><option>A418</option><option>B101</option><option>B102</option><option>B103</option><option>B104</option><option>B105</option><option>B106</option><option>B107</option><option>B108</option><option>B109</option><option>B110</option><option>B111</option><option>B112</option><option>B113</option><option>B114</option><option>B115</option><option>B116</option><option>B117</option><option>B118</option><option>B201</option><option>B202</option><option>B203</option><option>B204</option><option>B205</option><option>B206</option><option>B207</option><option>B208</option><option>B209</option><option>B210</option><option>B211</option><option>B212</option><option>B213</option><option>B214</option><option>B215</option><option>B216</option><option>B217</option><option>B218</option><option>B301</option><option>B302</option><option>B303</option><option>B304</option><option>B305</option><option>B306</option><option>B307</option><option>B308</option><option>B309</option><option>B310</option><option>B311</option><option>B312</option><option>B313</option><option>B314</option><option>B315</option><option>B316</option><option>B317</option><option>B318</option><option>B401</option><option>B402</option><option>B403</option><option>B404</option><option>B405</option><option>B406</option><option>B407</option><option>B408</option><option>B409</option><option>B410</option><option>B411</option><option>B412</option><option>B413</option><option>B414</option><option>B415</option><option>B416</option><option>B417</option><option>B418</option><option>B501</option><option>B502</option><option>B503</option><option>B504</option><option>B505</option><option>B506</option><option>B507</option><option>B508</option><option>B509</option><option>B510</option><option>B511</option><option>B512</option><option>B513</option><option>B514</option><option>B515</option><option>B516</option><option>B517</option><option>B518</option><option>B601</option><option>B602</option><option>B603</option><option>B604</option><option>B605</option><option>B606</option><option>B607</option><option>B608</option><option>B609</option><option>B610</option><option>B611</option><option>B612</option><option>B613</option><option>B614</option><option>B615</option><option>B616</option><option>B617</option><option>B618</option></select></label>
+<label id="storageLabel" class="hidden-field">Currently stored at<input id="storageLocation" placeholder="e.g. Security Office"></label></div>
+</div>
+<div class="privacy-note"><strong>Privacy note</strong><p>Your university identity is used for accountability. Your email is not displayed publicly on the item card.</p></div>
+<div class="form-error" id="formError"></div>
+<div class="modal-actions"><button type="button" class="btn btn-outline" data-close-modal>Cancel</button><button type="submit" class="btn btn-danger" id="submitReportBtn">Publish Lost Report</button></div>
+</form>
+</div></div>
+
+<div class="modal-backdrop" id="listingModal" aria-hidden="true"><div class="modal report-modal" role="dialog" aria-modal="true" aria-labelledby="listingTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><div class="modal-head"><span class="modal-icon green-icon">◇</span><div><p class="eyebrow">CAMPUS MARKETPLACE</p><h2 id="listingTitle">Create a listing</h2><p>Share a useful item with fellow students.</p></div></div><form id="listingForm"><div class="form-section"><div class="form-grid"><label>Listing type *<select id="listingType" required><option value="SELL">For sale</option><option value="RENT">For rent</option></select></label><label>Category *<select id="listingCategory" required><option value="">Choose category</option><option>Books</option><option>Electronics</option><option>Accessories</option><option>Sports</option><option>Other</option></select></label></div><label>Item name *<input id="listingName" required maxlength="120" placeholder="e.g. Casio scientific calculator"></label><label>Description *<textarea id="listingDescription" required maxlength="700" placeholder="Condition, included accessories and any useful details"></textarea></label><div class="form-grid"><label>Price (₹) *<input id="listingPrice" type="number" required min="0" step="1" placeholder="e.g. 800"></label><label id="rentalPeriodLabel" class="hidden-field">Rental period<select id="listingPeriod"><option value="day">Per day</option><option value="week">Per week</option><option value="month">Per month</option><option value="semester">Per semester</option></select></label></div><label>Meet-up location *<input id="listingLocation" required maxlength="180" placeholder="e.g. KJSSE Engineering Canteen"></label></div><div class="form-section"><h3>Photo</h3><label class="upload-zone" for="listingImage"><span class="upload-preview" id="listingUploadPreview">＋</span><strong id="listingUploadText">Add a clear item photo</strong><small>JPG, PNG or WEBP · max 5 MB</small><input id="listingImage" type="file" accept="image/png,image/jpeg,image/webp"></label></div><div class="privacy-note"><strong>Safe exchange tip</strong><p>Checkout is not enabled yet. Arrange payment directly with the seller, verify funds in your own payment app, and meet in a busy public campus area. Never share passwords or verification codes.</p></div><div id="listingError" class="form-error"></div><div class="modal-actions"><button type="button" class="btn btn-outline" data-close-modal>Cancel</button><button type="submit" class="btn btn-success" id="publishListingBtn">Publish listing</button></div></form></div></div>
+
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="itemModal" aria-hidden="true"><div class="modal detail-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Close">×</button><div id="itemDetailContent"></div></div></div>
+
+<!-- CLAIM MODAL -->
+<div class="modal-backdrop" id="claimModal" aria-hidden="true"><div class="modal claim-modal" role="dialog" aria-modal="true">
+<button class="modal-close" data-close-modal aria-label="Close">×</button>
+<div class="modal-head"><span class="modal-icon green-icon">✓</span><div><p class="eyebrow">PRIVATE VERIFICATION</p><h2>Could this be yours?</h2><p>Answer a detail that is not visible in the public listing.</p></div></div>
+<form id="claimForm"><input type="hidden" id="claimItemId"><div class="claim-item-preview" id="claimItemPreview"></div>
+<label>Why do you believe this is your item? *<textarea id="claimReason" required maxlength="500" placeholder="Mention a private identifying detail, approximate time/place or ownership evidence."></textarea></label>
+<div class="privacy-note"><strong>Keep private details private.</strong><p>Your response is only used to help evaluate the claim. It is not shown on the public item card.</p></div>
+<div class="form-error" id="claimError"></div><div class="modal-actions"><button type="button" class="btn btn-outline" data-close-modal>Cancel</button><button type="submit" class="btn btn-success">Submit Claim</button></div>
+</form></div></div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="logic.js?v=unifind-campus-20261019-3"></script>
+</body>
+</html>
